@@ -8,17 +8,19 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,Bli
 .nav a{margin-left:12px;color:#333;text-decoration:none}
 .container{max-width:1200px;margin:24px auto;padding:0 16px}
 .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.cards.kpi .card-value{font-size:26px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px}
 .card-title{color:var(--muted);font-size:14px}
 .card-value{font-size:22px;font-weight:700;margin-top:6px}
 .table{width:100%;border-collapse:collapse;margin-top:16px;background:#fff;border:1px solid var(--border)}
 .table th,.table td{border-bottom:1px solid var(--border);padding:8px 10px;text-align:left}
+.table.small th,.table.small td{padding:6px 8px;font-size:14px}
 .footer{padding:24px 16px;color:var(--muted);text-align:center}
 .sel, select, input, textarea{padding:6px 8px;border:1px solid #ddd;border-radius:6px;background:#fff}
 .btn{padding:6px 10px;border:1px solid #ddd;border-radius:6px;background:#f7f7f7;cursor:pointer}
 .btn.primary{background:#2563eb;color:#fff;border-color:#1d4ed8}
 .btn.danger{background:#ef4444;color:#fff;border-color:#dc2626}
-@media (max-width:800px){.cards{grid-template-columns:1fr}}
+@media (max-width:900px){.cards{grid-template-columns:1fr}}
 
 /* 툴바 */
 .cal-toolbar{display:flex;justify-content:space-between;gap:12px;margin:8px 0 12px 0}
@@ -69,7 +71,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,Bli
 .day-row .row-head{padding:6px 8px; background:#fcfcfc; border-right:1px solid var(--border); font-weight:600}
 .day-row .row-body{position:relative}
 
-/* 관리자/메타 */
+/* 관리자/메타/DB */
 .row{display:flex;gap:12px;align-items:center;padding:6px 0;border-bottom:1px solid #eee}
 .row.head{font-weight:600;border-bottom:2px solid #ddd}
 .row span{min-width:120px}
