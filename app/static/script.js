@@ -64,15 +64,18 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   if ($("#month-board")) initMonthlyCalendar(); // /calendar/month
 });
 
-// ========== 대시보드(라벨 표기/보조 카드 포함) ==========
+// ========== 대시보드 ==========
 async function initDashboard(){
   const fromEl=$("#dash-from"), toEl=$("#dash-to"), brEl=$("#dash-branch"), teamEl=$("#dash-team");
   const to=new Date(), from=new Date(); from.setDate(to.getDate()-30);
   fromEl.value = toDateInput(from); toEl.value = toDateInput(to);
+
   brEl.innerHTML = `<option value="">지점 전체</option>` + Meta.branches.filter(b=>b.active).map(b=>`<option value="${b.code}">${b.label_ko}</option>`).join("");
   teamEl.innerHTML = `<option value="">팀 전체</option>` + Meta.teams.filter(t=>t.active).map(t=>`<option value="${t.code}">${t.label_ko}</option>`).join("");
+
   $("#dash-apply").addEventListener("click", loadDashboard);
   await loadDashboard();
+
   async function loadDashboard(){
     const params = new URLSearchParams({ from_date: fromEl.value, to_date: toEl.value });
     if (brEl.value) params.append("branch", brEl.value);
@@ -130,7 +133,7 @@ async function initDashboard(){
   function fmtRate(v){ return (v===null||v===undefined) ? "-" : (v*100).toFixed(1)+"%"; }
 }
 
-// ========== 주간 캘린더(핵심만 유지) ==========
+// ========== 주간 캘린더 ==========
 function initWeeklyCalendar(){
   const weekStartInput = $("#week-start");
   const btnPrev = $("#btn-prev-week"), btnNext = $("#btn-next-week");
@@ -205,18 +208,219 @@ function initWeeklyCalendar(){
   }
 }
 
-// ========== 결과 관리(이미 구현됨) ==========
-function initResultsTable(){ /* 결과 테이블 초기화는 기존 코드 유지 */ }
-async function loadResults(){ /* 기존 코드 유지 */ }
-function onBatchApply(){ /* 기존 코드 유지 */ }
+// ========== 결과 관리 ==========
+function initResultsTable(){
+  $("#res-branch").innerHTML = `<option value="">지점 전체</option>` + Meta.branches.filter(b=>b.active).map(b=>`<option value="${b.code}">${b.label_ko}</option>`).join("");
+  $("#res-team").innerHTML = `<option value="">팀 전체</option>` + Meta.teams.filter(t=>t.active).map(t=>`<option value="${t.code}">${t.label_ko}</option>`).join("");
+  $("#res-counselor").innerHTML = `<option value="">상담사 전체</option>` + Meta.counselors.map(c=>`<option value="${c.id}">${c.name} (${c.branch}/${c.team})</option>`).join("");
 
-// ========== 일자 타임라인(이미 구현됨) ==========
-function initDayTimeline(){ /* 기존 코드 유지 */ }
-async function loadDayAndRender(){ /* 기존 코드 유지 */ }
-function renderDayRows(list){ /* 기존 코드 유지 */ }
+  const to=new Date(), from=new Date(); from.setDate(to.getDate()-7);
+  $("#res-from").value = toDateInput(from);
+  $("#res-to").value = toDateInput(to);
 
-// ========== 일별 DB 입력(이미 구현됨) ==========
-function initAdminDB(){ /* 기존 코드 유지 */ }
+  $("#res-apply").addEventListener("click", loadResults);
+  $("#chk-all").addEventListener("change", (e)=>{ $$("#res-tbody input[type='checkbox']").forEach(ch=>ch.checked=e.target.checked); });
+
+  $("#batch-registered").innerHTML = `<option value="">등록 과목 선택</option>`;
+  $("#batch-apply").addEventListener("click", onBatchApply);
+
+  loadResults();
+}
+
+async function loadResults(){
+  const params = new URLSearchParams({ from_date: $("#res-from").value, to_date: $("#res-to").value });
+  const b=$("#res-branch").value, t=$("#res-team").value, c=$("#res-counselor").value, m=$("#res-mode").value, s=$("#res-status").value;
+  if (b) params.append("branch", b);
+  if (t) params.append("team", t);
+  if (c) params.append("counselor_id", c);
+  if (m) params.append("mode", m);
+  if (s) params.append("status", s);
+
+  const regSel = $("#batch-registered");
+  if (b){
+    const subs = await ensureSubjects(b);
+    regSel.innerHTML = `<option value="">등록 과목 선택</option>` + subs.map(x=>`<option value="${x.id}">${x.name}</option>`).join("");
+  }else{
+    regSel.innerHTML = `<option value="">등록 과목 선택</option>`;
+  }
+
+  const list = await fetchJSON("/api/sessions?"+params.toString());
+  const tbody = $("#res-tbody"); tbody.innerHTML = "";
+  const subjMap = new Map(); Meta.subjectsByBranch.forEach(arr=>arr.forEach(s=>subjMap.set(s.id, s.name)));
+  const counselorMap = new Map(Meta.counselors.map(c=>[c.id, c.name]));
+  for (const s of list){
+    const tr = document.createElement("tr");
+    const reqName = subjMap.get(s.requested_subject_id) || "";
+    const regName = subjMap.get(s.registered_subject_id) || "";
+    tr.innerHTML = `
+      <td><input type="checkbox" data-id="${s.id}"></td>
+      <td>${s.date}</td>
+      <td>${s.start_time.slice(0,5)}~${s.end_time.slice(0,5)}</td>
+      <td>${s.branch}</td>
+      <td>${s.team}</td>
+      <td>${counselorMap.get(s.counselor_id) || ("#"+s.counselor_id)}</td>
+      <td>${reqName}</td>
+      <td>${s.status}</td>
+      <td>${regName}</td>
+      <td>${s.cancel_reason || ""}</td>
+      <td>${s.mode==="REMOTE"?"비":"오프"}</td>
+      <td>${s.comment || ""}</td>
+    `;
+    tr.addEventListener("dblclick", ()=>openSessionModal(s, "edit"));
+    tbody.appendChild(tr);
+  }
+}
+
+async function onBatchApply(){
+  const ids = $$("#res-tbody input[type='checkbox']:checked").map(ch=>+ch.dataset.id);
+  if (ids.length===0){ alert("선택된 항목이 없습니다."); return; }
+  const payload = {
+    ids,
+    status: $("#batch-status").value || null,
+    registered_subject_id: $("#batch-registered").value ? +$("#batch-registered").value : null,
+    cancel_reason: $("#batch-cancel").value || null,
+    comment: $("#batch-comment").value || null
+  };
+  try{
+    const r = await fetchJSON("/api/sessions/batch/update-status", {
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(payload)
+    });
+    alert(`일괄 변경 완료: ${r.updated}건`);
+    await loadResults();
+  }catch(e){
+    alert("일괄 변경 실패: "+e.message);
+  }
+}
+
+// ========== 일자 타임라인 ==========
+function initDayTimeline(){
+  $("#day-branch").innerHTML = `<option value="">지점 전체</option>` + Meta.branches.filter(b=>b.active).map(b=>`<option value="${b.code}">${b.label_ko}</option>`).join("");
+  $("#day-team").innerHTML = `<option value="">팀 전체</option>` + Meta.teams.filter(t=>t.active).map(t=>`<option value="${t.code}">${t.label_ko}</option>`).join("");
+
+  const today = new Date(); $("#day-date").value = toDateInput(today);
+  $("#day-prev").addEventListener("click", ()=>{ const d=fromDateInput($("#day-date").value); d.setDate(d.getDate()-1); $("#day-date").value=toDateInput(d); loadDayAndRender(); });
+  $("#day-next").addEventListener("click", ()=>{ const d=fromDateInput($("#day-date").value); d.setDate(d.getDate()+1); $("#day-date").value=toDateInput(d); loadDayAndRender(); });
+  ["day-branch","day-team","day-mode","day-date"].forEach(id=>$("#"+id).addEventListener("change", loadDayAndRender));
+
+  const rail = $("#day-time-rail"); rail.innerHTML="";
+  for (let m=DAY_START; m<=DAY_END; m+=SLOT_MIN){
+    const div=document.createElement("div"); div.className="time-slot"; div.style.height=24+"px";
+    const h=Math.floor(m/60), mm=m%60; div.textContent=`${pad2(h)}:${pad2(mm)}`;
+    rail.appendChild(div);
+  }
+  loadDayAndRender();
+}
+
+async function loadDayAndRender(){
+  const d = $("#day-date").value;
+  const params = new URLSearchParams({ from_date:d, to_date:d });
+  const b=$("#day-branch").value, t=$("#day-team").value, m=$("#day-mode").value;
+  if (b) params.append("branch", b);
+  if (t) params.append("team", t);
+  if (m) params.append("mode", m);
+  const list = await fetchJSON("/api/sessions?"+params.toString());
+  renderDayRows(list);
+}
+
+function renderDayRows(list){
+  const rowsEl = $("#day-rows"); rowsEl.innerHTML="";
+  const byCounselor = new Map();
+  for (const s of list){ if(!byCounselor.has(s.counselor_id)) byCounselor.set(s.counselor_id, []); byCounselor.get(s.counselor_id).push(s); }
+  const nameOf = (id)=> (Meta.counselors.find(c=>c.id===id)?.name || ("#"+id));
+
+  for (const [cid, arr] of byCounselor.entries()){
+    const row = document.createElement("div"); row.className="day-row";
+    row.innerHTML = `<div class="row-head">${nameOf(cid)}</div><div class="row-body"></div>`;
+    const body=row.querySelector(".row-body"); body.style.position="relative"; body.style.height=((DAY_END-DAY_START)/SLOT_MIN)*SLOT_HEIGHT+"px";
+    for (const ev of arr.sort((a,b)=>a.start_time.localeCompare(b.start_time))){
+      const el=document.createElement("div"); el.className="event";
+      const color = statusColor(ev.status);
+      el.style.top=posTopPx(ev.start_time)+"px"; el.style.height=Math.max(20, heightPx(ev.start_time, ev.end_time))+"px";
+      el.style.background=color.bg; el.style.borderColor=color.border;
+      el.title = `${ev.start_time.slice(0,5)}~${ev.end_time.slice(0,5)} (${ev.status})`;
+      el.innerHTML = `<div class="ev-time">${ev.start_time.slice(0,5)}~${ev.end_time.slice(0,5)}</div><div class="ev-title">${ev.status}</div>`;
+      el.addEventListener("click", ()=>openSessionModal(ev,"edit"));
+      body.appendChild(el);
+    }
+    rowsEl.appendChild(row);
+  }
+}
+
+// ========== 일별 DB 입력 ==========
+function initAdminDB(){
+  // 지점 입력
+  const dateB=$("#db-date-branch"), selB=$("#db-branch"), cntB=$("#db-count-branch"), btnB=$("#db-save-branch");
+  const toB=$("#db-to-branch"), fromB=$("#db-from-branch"), fSelB=$("#db-filter-branch"), btnLB=$("#db-load-branch"), tbodyB=$("#db-table-branch tbody");
+  // 팀 입력
+  const dateT=$("#db-date-team"), selT=$("#db-team"), cntT=$("#db-count-team"), btnT=$("#db-save-team");
+  const toT=$("#db-to-team"), fromT=$("#db-from-team"), fSelT=$("#db-filter-team"), btnLT=$("#db-load-team"), tbodyT=$("#db-table-team tbody");
+
+  const today=new Date();
+  if (dateB) dateB.value = toDateInput(today);
+  if (dateT) dateT.value = toDateInput(today);
+
+  if (selB) selB.innerHTML = Meta.branches.filter(b=>b.active).map(b=>`<option value="${b.code}">${b.label_ko}</option>`).join("");
+  if (fSelB) fSelB.innerHTML = `<option value="">지점 전체</option>` + Meta.branches.filter(b=>b.active).map(b=>`<option value="${b.code}">${b.label_ko}</option>`).join("");
+
+  if (selT) selT.innerHTML = Meta.teams.filter(t=>t.active).map(t=>`<option value="${t.code}">${t.label_ko}</option>`).join("");
+  if (fSelT) fSelT.innerHTML = `<option value="">팀 전체</option>` + Meta.teams.filter(t=>t.active).map(t=>`<option value="${t.code}">${t.label_ko}</option>`).join("");
+
+  const to=new Date(), from=new Date(); from.setDate(to.getDate()-7);
+  if (toB && fromB){ toB.value = toDateInput(to); fromB.value = toDateInput(from); }
+  if (toT && fromT){ toT.value = toDateInput(to); fromT.value = toDateInput(from); }
+
+  if (btnB) btnB.addEventListener("click", async ()=>{
+    try{
+      await fetchJSON("/api/daily-db", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ date: dateB.value, branch: selB.value, db_count: parseInt(cntB.value||"0",10) })
+      });
+      alert("지점 DB 저장 완료");
+      await loadBranchList();
+    }catch(e){ alert("지점 DB 저장 실패: "+e.message); }
+  });
+
+  if (btnT) btnT.addEventListener("click", async ()=>{
+    try{
+      await fetchJSON("/api/daily-db-team", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ date: dateT.value, team: selT.value, db_count: parseInt(cntT.value||"0",10) })
+      });
+      alert("팀 DB 저장 완료");
+      await loadTeamList();
+    }catch(e){ alert("팀 DB 저장 실패: "+e.message); }
+  });
+
+  if (btnLB) btnLB.addEventListener("click", loadBranchList);
+  if (btnLT) btnLT.addEventListener("click", loadTeamList);
+
+  loadBranchList();
+  loadTeamList();
+
+  async function loadBranchList(){
+    const all = await fetchJSON("/api/daily-db");
+    if (!tbodyB) return;
+    const fromV=fromDateInput(fromB.value), toV=fromDateInput(toB.value), fb=fSelB.value;
+    const rows = all.filter(r=>{
+      const d=fromDateInput(r.date);
+      return d>=fromV && d<=toV && (!fb || r.branch===fb);
+    }).sort((a,b)=> (a.date===b.date ? a.branch.localeCompare(b.branch) : b.date.localeCompare(a.date)));
+    tbodyB.innerHTML = rows.map(r=>`<tr><td>${r.date}</td><td>${r.branch}</td><td>${r.db_count}</td></tr>`).join("") || `<tr><td colspan="3">데이터 없음</td></tr>`;
+  }
+
+  async function loadTeamList(){
+    const all = await fetchJSON("/api/daily-db-team");
+    if (!tbodyT) return;
+    const fromV=fromDateInput(fromT.value), toV=fromDateInput(toT.value), ft=fSelT.value;
+    const rows = all.filter(r=>{
+      const d=fromDateInput(r.date);
+      return d>=fromV && d<=toV && (!ft || r.team===ft);
+    }).sort((a,b)=> (a.date===b.date ? a.team.localeCompare(b.team) : b.date.localeCompare(a.date)));
+    tbodyT.innerHTML = rows.map(r=>`<tr><td>${r.date}</td><td>${r.team}</td><td>${r.db_count}</td></tr>`).join("") || `<tr><td colspan="3">데이터 없음</td></tr>`;
+  }
+}
 
 // ========== 내 일자 등록 ==========
 async function initMyDaily(){
