@@ -8,19 +8,19 @@ STATUSES = ["PENDING", "DONE", "REGISTERED", "NOT_REGISTERED", "CANCELED"]
 CANCEL_REASONS = ["PERSONAL", "OTHER_INSTITUTE", "NO_ANSWER", "RESCHEDULE"]
 MODES = ["REMOTE", "OFFLINE"]  # UI 표기: 비/오프
 
-# 지점/팀 마스터
+# 지점/팀 마스터(데이터 기반)
 class Branch(Base):
     __tablename__ = "branches"
     id = Column(Integer, primary_key=True)
-    code = Column(String, unique=True, nullable=False)   # KH, ATENZ, VIDEO
-    label_ko = Column(String, nullable=False)            # KH, 아텐츠, 영상
+    code = Column(String, unique=True, nullable=False)   # 예: KH, ATENZ, VIDEO
+    label_ko = Column(String, nullable=False)            # 예: KH, 아텐츠, 영상
     active = Column(Boolean, default=True)
 
 class Team(Base):
     __tablename__ = "teams"
     id = Column(Integer, primary_key=True)
-    code = Column(String, unique=True, nullable=False)   # JONGNO, DANGSAN, GANGNAM1, GANGNAM2
-    label_ko = Column(String, nullable=False)            # 종로, 당산, 강남 1팀, 강남 2팀
+    code = Column(String, unique=True, nullable=False)   # 예: JONGNO, DANGSAN, GANGNAM1, GANGNAM2
+    label_ko = Column(String, nullable=False)            # 예: 종로, 당산, 강남 1팀, 강남 2팀
     active = Column(Boolean, default=True)
 
 class Counselor(Base):
@@ -52,14 +52,11 @@ class Session(Base):
     branch = Column(String, nullable=False)  # Branch.code
     team = Column(String, nullable=False)    # Team.code
 
-    # 신규: 학생명(내담자)
-    student_name = Column(String, nullable=True)
-
     requested_subject_id = Column(Integer, ForeignKey("subjects.id"), nullable=True)
     registered_subject_id = Column(Integer, ForeignKey("subjects.id"), nullable=True)
 
-    mode = Column(String, default="OFFLINE")   # REMOTE/OFFLINE
-    status = Column(String, default="PENDING") # PENDING/DONE/REGISTERED/NOT_REGISTERED/CANCELED
+    mode = Column(String, default="OFFLINE")  # REMOTE/OFFLINE
+    status = Column(String, default="PENDING")  # PENDING/DONE/REGISTERED/NOT_REGISTERED/CANCELED
     cancel_reason = Column(String, nullable=True)
     comment = Column(String, nullable=True)
 
@@ -75,4 +72,12 @@ class DailyDB(Base):
     id = Column(Integer, primary_key=True)
     date = Column(Date, nullable=False)
     branch = Column(String, nullable=False)  # Branch.code
+    db_count = Column(Integer, nullable=False, default=0)
+
+# 신규: 팀별 일별 DB (팀 필터 시 상담률 분모로 사용)
+class DailyDBTeam(Base):
+    __tablename__ = "daily_db_team"
+    id = Column(Integer, primary_key=True)
+    date = Column(Date, nullable=False)
+    team = Column(String, nullable=False)    # Team.code
     db_count = Column(Integer, nullable=False, default=0)
