@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>일자 타임라인</h1>
+
+<div class="cal-toolbar">
+  <div class="cal-left">
+    <input type="date" id="day-date">
+    <button id="day-prev" class="btn">◀ 전날</button>
+    <button id="day-next" class="btn">다음날 ▶</button>
+  </div>
+  <div class="cal-right">
+    <select id="day-branch" class="sel"></select>
+    <select id="day-team" class="sel"></select>
+    <select id="day-mode" class="sel">
+      <option value="">모드 전체</option>
+      <option value="OFFLINE">오프</option>
+      <option value="REMOTE">비</option>
+    </select>
+  </div>
+</div>
+
+<div id="day-board" class="day-board">
+  <div class="time-rail" id="day-time-rail"></div>
+  <div class="rows" id="day-rows"></div>
+</div>
+{% endblock %}
