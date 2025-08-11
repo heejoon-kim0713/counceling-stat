@@ -14,7 +14,6 @@ from app.services.labels import branch_label, team_label, mode_label
 
 router = APIRouter()
 
-# __file__ = app/routers/views.py
 APP_DIR = Path(__file__).resolve().parents[1]
 REPO_ROOT = APP_DIR.parent
 templates = Jinja2Templates(directory=str(APP_DIR / "templates"))
@@ -99,3 +98,7 @@ def mismatch_page(
 @router.get("/admin/meta", response_class=HTMLResponse)
 def admin_meta(request: Request):
     return templates.TemplateResponse("admin_meta.html", {"request": request})
+
+@router.get("/admin/db", response_class=HTMLResponse)
+def admin_db(request: Request):
+    return templates.TemplateResponse("admin_db.html", {"request": request})
