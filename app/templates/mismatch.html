@@ -9,29 +9,16 @@
 <table class="table">
   <thead>
     <tr>
-      <th>일자</th>
-      <th>시간</th>
-      <th>지점</th>
-      <th>팀</th>
-      <th>상담사</th>
-      <th>신청 과목</th>
-      <th>등록 과목</th>
-      <th>비/오프</th>
-      <th>코멘트</th>
+      <th>일자</th><th>시간</th><th>지점</th><th>팀</th><th>상담사</th>
+      <th>신청 과목</th><th>등록 과목</th><th>비/오프</th><th>코멘트</th>
     </tr>
   </thead>
   <tbody>
     {% for r in items %}
     <tr>
-      <td>{{ r.date }}</td>
-      <td>{{ r.time }}</td>
-      <td>{{ r.branch }}</td>
-      <td>{{ r.team }}</td>
-      <td>{{ r.counselor }}</td>
-      <td>{{ r.requested }}</td>
-      <td>{{ r.registered }}</td>
-      <td>{{ r.mode }}</td>
-      <td>{{ r.comment }}</td>
+      <td>{{ r.date }}</td><td>{{ r.time }}</td><td>{{ r.branch }}</td><td>{{ r.team }}</td>
+      <td>{{ r.counselor }}</td><td>{{ r.requested }}</td><td>{{ r.registered }}</td>
+      <td>{{ r.mode }}</td><td>{{ r.comment }}</td>
     </tr>
     {% endfor %}
   </tbody>
