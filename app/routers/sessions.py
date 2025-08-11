@@ -20,10 +20,11 @@ class SessionCreate(BaseModel):
     counselor_id: int
     branch: str
     team: str
+    student_name: Optional[str] = None
     requested_subject_id: Optional[int] = None
     registered_subject_id: Optional[int] = None
-    mode: str = Field(default="OFFLINE")   # OFFLINE or REMOTE
-    status: str = Field(default="PENDING") # PENDING/DONE/REGISTERED/NOT_REGISTERED/CANCELED
+    mode: str = Field(default="OFFLINE")
+    status: str = Field(default="PENDING")
     cancel_reason: Optional[str] = None
     comment: Optional[str] = None
 
@@ -34,6 +35,7 @@ class SessionUpdate(BaseModel):
     counselor_id: Optional[int] = None
     branch: Optional[str] = None
     team: Optional[str] = None
+    student_name: Optional[str] = None
     requested_subject_id: Optional[int] = None
     registered_subject_id: Optional[int] = None
     mode: Optional[str] = None
@@ -76,6 +78,7 @@ def list_sessions(
         "counselor_id": s.counselor_id,
         "branch": s.branch,
         "team": s.team,
+        "student_name": s.student_name,
         "requested_subject_id": s.requested_subject_id,
         "registered_subject_id": s.registered_subject_id,
         "mode": s.mode,
@@ -97,6 +100,7 @@ def get_session(session_id: int = Path(...), db: Session = Depends(get_db)):
         "counselor_id": s.counselor_id,
         "branch": s.branch,
         "team": s.team,
+        "student_name": s.student_name,
         "requested_subject_id": s.requested_subject_id,
         "registered_subject_id": s.registered_subject_id,
         "mode": s.mode,
@@ -119,11 +123,9 @@ def create_session(payload: SessionCreate, db: Session = Depends(get_db)):
     cons = db.query(Counselor).filter(Counselor.id == payload.counselor_id).first()
     if not cons:
         raise HTTPException(404, "상담사를 찾을 수 없습니다.")
-
     if check_overlap(db, counselor_id=payload.counselor_id, date=payload.date,
                      start_time=payload.start_time, end_time=payload.end_time):
         raise HTTPException(400, "동일 상담사의 시간이 겹칩니다.")
-
     try:
         validate_branch_team(db, branch=payload.branch, team=payload.team)
         enforce_conditionals(status=payload.status,
@@ -136,17 +138,12 @@ def create_session(payload: SessionCreate, db: Session = Depends(get_db)):
         raise HTTPException(400, str(e))
 
     s = Sess(
-        date=payload.date,
-        start_time=payload.start_time,
-        end_time=payload.end_time,
-        counselor_id=payload.counselor_id,
-        branch=payload.branch,
-        team=payload.team,
+        date=payload.date, start_time=payload.start_time, end_time=payload.end_time,
+        counselor_id=payload.counselor_id, branch=payload.branch, team=payload.team,
+        student_name=payload.student_name,
         requested_subject_id=payload.requested_subject_id,
         registered_subject_id=payload.registered_subject_id,
-        mode=payload.mode,
-        status=payload.status,
-        cancel_reason=payload.cancel_reason,
+        mode=payload.mode, status=payload.status, cancel_reason=payload.cancel_reason,
         comment=payload.comment
     )
     db.add(s); db.commit(); db.refresh(s)
@@ -165,6 +162,7 @@ def update_session(session_id: int, payload: SessionUpdate, db: Session = Depend
         "counselor_id": payload.counselor_id or s.counselor_id,
         "branch": payload.branch or s.branch,
         "team": payload.team or s.team,
+        "student_name": payload.student_name if payload.student_name is not None else s.student_name,
         "requested_subject_id": payload.requested_subject_id if payload.requested_subject_id is not None else s.requested_subject_id,
         "registered_subject_id": payload.registered_subject_id if payload.registered_subject_id is not None else s.registered_subject_id,
         "mode": payload.mode or s.mode,
@@ -185,11 +183,9 @@ def update_session(session_id: int, payload: SessionUpdate, db: Session = Depend
     cons = db.query(Counselor).filter(Counselor.id == new["counselor_id"]).first()
     if not cons:
         raise HTTPException(404, "상담사를 찾을 수 없습니다.")
-
     if check_overlap(db, counselor_id=new["counselor_id"], date=new["date"],
                      start_time=new["start_time"], end_time=new["end_time"], ignore_id=session_id):
         raise HTTPException(400, "동일 상담사의 시간이 겹칩니다.")
-
     try:
         validate_branch_team(db, branch=new["branch"], team=new["team"])
         enforce_conditionals(status=new["status"],
@@ -201,18 +197,11 @@ def update_session(session_id: int, payload: SessionUpdate, db: Session = Depend
     except ValueError as e:
         raise HTTPException(400, str(e))
 
-    s.date = new["date"]
-    s.start_time = new["start_time"]
-    s.end_time = new["end_time"]
-    s.counselor_id = new["counselor_id"]
-    s.branch = new["branch"]
-    s.team = new["team"]
-    s.requested_subject_id = new["requested_subject_id"]
-    s.registered_subject_id = new["registered_subject_id"]
-    s.mode = new["mode"]
-    s.status = new["status"]
-    s.cancel_reason = new["cancel_reason"]
-    s.comment = new["comment"]
+    s.date = new["date"]; s.start_time = new["start_time"]; s.end_time = new["end_time"]
+    s.counselor_id = new["counselor_id"]; s.branch = new["branch"]; s.team = new["team"]
+    s.student_name = new["student_name"]
+    s.requested_subject_id = new["requested_subject_id"]; s.registered_subject_id = new["registered_subject_id"]
+    s.mode = new["mode"]; s.status = new["status"]; s.cancel_reason = new["cancel_reason"]; s.comment = new["comment"]
     db.commit(); db.refresh(s)
     return {"ok": True}
 
@@ -228,7 +217,6 @@ def delete_session(session_id: int, db: Session = Depends(get_db)):
 def batch_update_status(payload: BatchUpdatePayload, db: Session = Depends(get_db)):
     if not payload.ids:
         raise HTTPException(400, "ids가 비어 있습니다.")
-    # 상태값 검증(있을 때만)
     if payload.status and payload.status not in STATUSES:
         raise HTTPException(400, "유효하지 않은 상태입니다.")
     updated = 0
@@ -238,26 +226,18 @@ def batch_update_status(payload: BatchUpdatePayload, db: Session = Depends(get_d
             continue
         new_status = payload.status or s.status
         try:
-            # 조건부 필수
             enforce_conditionals(status=new_status,
                                  registered_subject_id=(payload.registered_subject_id if payload.registered_subject_id is not None else s.registered_subject_id),
                                  cancel_reason=(payload.cancel_reason if payload.cancel_reason is not None else s.cancel_reason))
-            # 과목-지점 일치
             branch_subject_guard(db, branch=s.branch,
                                  requested_subject_id=s.requested_subject_id,
                                  registered_subject_id=(payload.registered_subject_id if payload.registered_subject_id is not None else s.registered_subject_id))
         except ValueError as e:
             raise HTTPException(400, f"id={sid}: {str(e)}")
-
-        # 반영
-        if payload.status is not None:
-            s.status = payload.status
-        if payload.cancel_reason is not None:
-            s.cancel_reason = payload.cancel_reason or None
-        if payload.comment is not None:
-            s.comment = payload.comment or None
-        if payload.registered_subject_id is not None:
-            s.registered_subject_id = payload.registered_subject_id
+        if payload.status is not None: s.status = payload.status
+        if payload.cancel_reason is not None: s.cancel_reason = payload.cancel_reason or None
+        if payload.comment is not None: s.comment = payload.comment or None
+        if payload.registered_subject_id is not None: s.registered_subject_id = payload.registered_subject_id
         updated += 1
     db.commit()
     return {"updated": updated}
