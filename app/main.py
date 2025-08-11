@@ -1,14 +1,22 @@
+# app/main.py
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
+from pathlib import Path
+
 from app.db import Base, engine, SessionLocal
 from app.models import Subject, Counselor, Branch, Team
 from app.routers import views, subjects, counselors, sessions, daily_db, meta
 
 app = FastAPI(title="상담 스케줄러")
 
-app.mount("/static", StaticFiles(directory="."), name="static")
+# 정적 파일: app/static 디렉터리로 고정
+BASE_DIR = Path(__file__).resolve().parents[1]
+STATIC_DIR = BASE_DIR / "app" / "static"
+STATIC_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
+# 라우터
 app.include_router(views.router, tags=["views"])
 app.include_router(subjects.router, prefix="/api/subjects", tags=["subjects"])
 app.include_router(counselors.router, prefix="/api/counselors", tags=["counselors"])
@@ -24,12 +32,12 @@ def on_startup():
 def seed_data():
     db: Session = SessionLocal()
     try:
-        # 지점 시드
+        # 지점 시드(한글 라벨)
         for code, label in [("KH","KH"), ("ATENZ","아텐츠"), ("VIDEO","영상")]:
             if not db.query(Branch).filter(Branch.code==code).first():
                 db.add(Branch(code=code, label_ko=label, active=True))
 
-        # 팀 시드
+        # 팀 시드(한글 라벨)
         for code, label in [("JONGNO","종로"), ("DANGSAN","당산"), ("GANGNAM1","강남 1팀"), ("GANGNAM2","강남 2팀")]:
             if not db.query(Team).filter(Team.code==code).first():
                 db.add(Team(code=code, label_ko=label, active=True))
