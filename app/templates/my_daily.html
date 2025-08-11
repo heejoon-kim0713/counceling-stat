@@ -22,12 +22,12 @@
   </div>
 </div>
 
-<!-- 공용 편집 모달 -->
-<div id="modal" class="modal hidden">
+<!-- 공용 편집 모달: FOUC 방지 위해 hidden + inline style -->
+<div id="modal" class="modal" hidden aria-hidden="true" style="display:none">
   <div class="modal-content">
     <div class="modal-header">
       <h3 id="modal-title">일정</h3>
-      <button id="modal-close" class="btn">✕</button>
+      <button id="modal-close" class="btn" type="button">✕</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="form-id">
@@ -83,9 +83,9 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button id="btn-delete" class="btn danger">삭제</button>
+      <button id="btn-delete" class="btn danger" type="button">삭제</button>
       <div style="flex:1"></div>
-      <button id="btn-save" class="btn primary">저장</button>
+      <button id="btn-save" class="btn primary" type="button">저장</button>
     </div>
   </div>
 </div>
