@@ -20,12 +20,16 @@
     <div class="card-value" id="card-branch-reg">-</div>
   </div>
   <div class="card">
-    <div class="card-title">지점별 상담률(전체)</div>
+    <div class="card-title">상담률(팀 필터 시 팀 DB 분모 사용)</div>
     <div class="card-value" id="card-branch-counsel">-</div>
   </div>
   <div class="card">
     <div class="card-title">과목별 등록률(신청 기준/전체)</div>
-    <div class="card-value" id="card-subject-reg">-</div>
+    <div class="card-value" id="card-subject-reg-req">-</div>
+  </div>
+  <div class="card">
+    <div class="card-title">과목별 등록률(등록 기준/보조)</div>
+    <div class="card-value" id="card-subject-reg-reg">-</div>
   </div>
 </div>
 
@@ -36,7 +40,7 @@
       <th>지점</th>
       <th>상담 수</th>
       <th>등록 수</th>
-      <th>총 DB 수</th>
+      <th>총 DB 수(분모)</th>
       <th>등록률</th>
       <th>상담률</th>
     </tr>
@@ -45,7 +49,7 @@
 </table>
 
 <h3>과목별 등록률(신청 기준)</h3>
-<table class="table small" id="tbl-subject">
+<table class="table small" id="tbl-subject-req">
   <thead>
     <tr>
       <th>과목</th>
@@ -53,6 +57,20 @@
       <th>상담 수</th>
       <th>등록 수</th>
       <th>등록률</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<h3>과목별 등록률(등록 기준·보조)</h3>
+<table class="table small" id="tbl-subject-reg">
+  <thead>
+    <tr>
+      <th>과목</th>
+      <th>지점</th>
+      <th>상담 수(신청)</th>
+      <th>등록 수(등록)</th>
+      <th>등록률(등록 기준)</th>
     </tr>
   </thead>
   <tbody></tbody>
