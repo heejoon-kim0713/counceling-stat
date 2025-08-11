@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>상담 스케줄러</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">상담 스케줄러</div>
+  <nav class="nav">
+    <a href="/dashboard">대시보드</a>
+    <a href="/calendar/weekly">주간 캘린더</a>
+    <a href="/mismatch">과목 불일치</a>
+  </nav>
+</header>
+<main class="container">
+  {% block content %}{% endblock %}
+</main>
+<footer class="footer">
+  <small>© 2025 상담 스케줄러</small>
+</footer>
+</body>
+</html>
