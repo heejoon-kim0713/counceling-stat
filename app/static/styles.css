@@ -20,6 +20,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,Bli
 .btn{padding:6px 10px;border:1px solid #ddd;border-radius:6px;background:#f7f7f7;cursor:pointer}
 .btn.primary{background:#2563eb;color:#fff;border-color:#1d4ed8}
 .btn.danger{background:#ef4444;color:#fff;border-color:#dc2626}
+.muted{color:#666}
 @media (max-width:900px){.cards{grid-template-columns:1fr}}
 
 /* 툴바 */
@@ -43,7 +44,15 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,Bli
   background-size: 100% 24px; pointer-events:none;
 }
 
-/* 이벤트 카드 */
+/* 일자 타임라인/내 일자 */
+.day-board{display:grid; grid-template-columns:100px 1fr; border:1px solid var(--border); border-radius:8px; background:#fff}
+.time-rail{border-right:1px solid var(--border); background:#fafafa}
+.time-rail .time-slot{height:24px; font-size:12px; color:#777; padding:2px 6px; border-bottom:1px dashed #eee}
+.day-row{display:grid; grid-template-columns:180px 1fr; border-top:1px solid var(--border)}
+.day-row .row-head{padding:6px 8px; background:#fcfcfc; border-right:1px solid var(--border); font-weight:600}
+.day-row .row-body{position:relative}
+
+/* 이벤트 카드(공통) */
 .event{
   position:absolute; left:8px; right:8px; border:1px solid #bbb; border-radius:6px;
   padding:4px 6px; font-size:12px; overflow:hidden;
@@ -52,6 +61,17 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,Bli
 }
 .ev-time{font-weight:700; margin-bottom:2px}
 .ev-title{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+
+/* 월간 캘린더 */
+.month-board{background:#fff;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.month-header{display:grid;grid-template-columns:repeat(7,1fr);background:#fafafa;border-bottom:1px solid var(--border)}
+.month-header > div{padding:8px;text-align:center;font-weight:700}
+.month-grid{display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:120px}
+.month-cell{border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:6px;display:flex;flex-direction:column}
+.month-cell.dim{background:#fbfbfb;color:#aaa}
+.month-cell-head{font-weight:700;margin-bottom:4px}
+.month-cell-body{display:flex;flex-direction:column;gap:4px;overflow:auto}
+.month-item{border:1px solid #ccc;border-radius:6px;font-size:12px;padding:2px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
 
 /* 모달 */
 .modal{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); z-index:1000}
@@ -62,14 +82,6 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,Bli
 .modal-footer{display:flex; align-items:center; gap:8px; padding:10px 12px; border-top:1px solid var(--border)}
 .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
 .grid .full{grid-column:1/-1}
-
-/* 일자 타임라인 */
-.day-board{display:grid; grid-template-columns:100px 1fr; border:1px solid var(--border); border-radius:8px; background:#fff}
-.time-rail{border-right:1px solid var(--border); background:#fafafa}
-.time-rail .time-slot{height:24px; font-size:12px; color:#777; padding:2px 6px; border-bottom:1px dashed #eee}
-.day-row{display:grid; grid-template-columns:180px 1fr; border-top:1px solid var(--border)}
-.day-row .row-head{padding:6px 8px; background:#fcfcfc; border-right:1px solid var(--border); font-weight:600}
-.day-row .row-body{position:relative}
 
 /* 관리자/메타/DB */
 .row{display:flex;gap:12px;align-items:center;padding:6px 0;border-bottom:1px solid #eee}
