@@ -6,7 +6,7 @@ from pathlib import Path
 
 from app.db import Base, engine, SessionLocal
 from app.models import Subject, Counselor, Branch, Team
-from app.routers import views, subjects, counselors, sessions, daily_db, meta, stats
+from app.routers import views, subjects, counselors, sessions, daily_db, daily_db_team, meta, stats
 
 app = FastAPI(title="상담 스케줄러")
 
@@ -22,6 +22,7 @@ app.include_router(subjects.router, prefix="/api/subjects", tags=["subjects"])
 app.include_router(counselors.router, prefix="/api/counselors", tags=["counselors"])
 app.include_router(sessions.router, prefix="/api/sessions", tags=["sessions"])
 app.include_router(daily_db.router, prefix="/api/daily-db", tags=["daily-db"])
+app.include_router(daily_db_team.router, prefix="/api/daily-db-team", tags=["daily-db-team"])
 app.include_router(meta.router, prefix="/api/meta", tags=["meta"])
 app.include_router(stats.router, prefix="/api/stats", tags=["stats"])
 
