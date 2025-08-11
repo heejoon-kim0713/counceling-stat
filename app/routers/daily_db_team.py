@@ -16,7 +16,9 @@ class DailyDBTeamPayload(BaseModel):
 
 @router.post("/")
 def upsert_daily_db_team(payload: DailyDBTeamPayload, db: Session = Depends(get_db)):
-    row = db.query(DailyDBTeam).filter(and_(DailyDBTeam.date == payload.date, DailyDBTeam.team == payload.team)).first()
+    row = db.query(DailyDBTeam).filter(
+        and_(DailyDBTeam.date == payload.date, DailyDBTeam.team == payload.team)
+    ).first()
     if row:
         row.db_count = payload.db_count
     else:
