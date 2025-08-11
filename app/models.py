@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Date, Time, ForeignKey, Boolean,
 from sqlalchemy.orm import relationship
 from app.db import Base
 
-# 문자열 상수(지점/팀/상태/사유/모드)
+# 상수값
 BRANCHES = ["KH", "ATENZ", "VIDEO"]
 TEAMS = ["JONGNO", "DANGSAN", "GANGNAM1", "GANGNAM2"]
 STATUSES = ["PENDING", "DONE", "REGISTERED", "NOT_REGISTERED", "CANCELED"]
@@ -13,12 +13,11 @@ class Counselor(Base):
     __tablename__ = "counselors"
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    branch = Column(String, nullable=False)  # KH, ATENZ, VIDEO
-    team = Column(String, nullable=False)    # JONGNO, DANGSAN, GANGNAM1, GANGNAM2
+    branch = Column(String, nullable=False)  # KH/ATENZ/VIDEO
+    team = Column(String, nullable=False)    # JONGNO/DANGSAN/GANGNAM1/GANGNAM2
     hired_at = Column(Date, nullable=True)
     left_at = Column(Date, nullable=True)
     status = Column(String, default="ACTIVE")  # ACTIVE/INACTIVE
-
     sessions = relationship("Session", back_populates="counselor")
 
 class Subject(Base):
@@ -36,7 +35,7 @@ class Session(Base):
     end_time = Column(Time, nullable=False)
 
     counselor_id = Column(Integer, ForeignKey("counselors.id"), nullable=False)
-    branch = Column(String, nullable=False)  # counselor 선택 시 기본 채움
+    branch = Column(String, nullable=False)
     team = Column(String, nullable=False)
 
     requested_subject_id = Column(Integer, ForeignKey("subjects.id"), nullable=True)
@@ -55,8 +54,4 @@ class Session(Base):
     registered_subject = relationship("Subject", foreign_keys=[registered_subject_id])
 
 class DailyDB(Base):
-    __tablename__ = "daily_db"
-    id = Column(Integer, primary_key=True)
-    date = Column(Date, nullable=False)
-    branch = Column(String, nullable=False)
-    db_count = Column(Integer, nullable=False, default=0)
+    __tablename__ = "
