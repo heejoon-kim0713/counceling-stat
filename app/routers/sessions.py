@@ -1,6 +1,6 @@
 # app/routers/sessions.py
 from datetime import date, time
-from typing import Optional
+from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Query, Path
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -22,7 +22,7 @@ class SessionCreate(BaseModel):
     team: str
     requested_subject_id: Optional[int] = None
     registered_subject_id: Optional[int] = None
-    mode: str = Field(default="OFFLINE")  # OFFLINE or REMOTE
+    mode: str = Field(default="OFFLINE")   # OFFLINE or REMOTE
     status: str = Field(default="PENDING") # PENDING/DONE/REGISTERED/NOT_REGISTERED/CANCELED
     cancel_reason: Optional[str] = None
     comment: Optional[str] = None
@@ -40,6 +40,13 @@ class SessionUpdate(BaseModel):
     status: Optional[str] = None
     cancel_reason: Optional[str] = None
     comment: Optional[str] = None
+
+class BatchUpdatePayload(BaseModel):
+    ids: List[int]
+    status: Optional[str] = None
+    cancel_reason: Optional[str] = None
+    comment: Optional[str] = None
+    registered_subject_id: Optional[int] = None
 
 @router.get("/")
 def list_sessions(
@@ -151,7 +158,6 @@ def update_session(session_id: int, payload: SessionUpdate, db: Session = Depend
     if not s:
         raise HTTPException(404, "세션을 찾을 수 없습니다.")
 
-    # 적용할 값 사전
     new = {
         "date": payload.date or s.date,
         "start_time": payload.start_time or s.start_time,
@@ -195,7 +201,6 @@ def update_session(session_id: int, payload: SessionUpdate, db: Session = Depend
     except ValueError as e:
         raise HTTPException(400, str(e))
 
-    # 반영
     s.date = new["date"]
     s.start_time = new["start_time"]
     s.end_time = new["end_time"]
@@ -218,3 +223,41 @@ def delete_session(session_id: int, db: Session = Depends(get_db)):
         raise HTTPException(404, "세션을 찾을 수 없습니다.")
     db.delete(s); db.commit()
     return {"ok": True}
+
+@router.post("/batch/update-status")
+def batch_update_status(payload: BatchUpdatePayload, db: Session = Depends(get_db)):
+    if not payload.ids:
+        raise HTTPException(400, "ids가 비어 있습니다.")
+    # 상태값 검증(있을 때만)
+    if payload.status and payload.status not in STATUSES:
+        raise HTTPException(400, "유효하지 않은 상태입니다.")
+    updated = 0
+    for sid in payload.ids:
+        s = db.query(Sess).get(sid)
+        if not s:
+            continue
+        new_status = payload.status or s.status
+        try:
+            # 조건부 필수
+            enforce_conditionals(status=new_status,
+                                 registered_subject_id=(payload.registered_subject_id if payload.registered_subject_id is not None else s.registered_subject_id),
+                                 cancel_reason=(payload.cancel_reason if payload.cancel_reason is not None else s.cancel_reason))
+            # 과목-지점 일치
+            branch_subject_guard(db, branch=s.branch,
+                                 requested_subject_id=s.requested_subject_id,
+                                 registered_subject_id=(payload.registered_subject_id if payload.registered_subject_id is not None else s.registered_subject_id))
+        except ValueError as e:
+            raise HTTPException(400, f"id={sid}: {str(e)}")
+
+        # 반영
+        if payload.status is not None:
+            s.status = payload.status
+        if payload.cancel_reason is not None:
+            s.cancel_reason = payload.cancel_reason or None
+        if payload.comment is not None:
+            s.comment = payload.comment or None
+        if payload.registered_subject_id is not None:
+            s.registered_subject_id = payload.registered_subject_id
+        updated += 1
+    db.commit()
+    return {"updated": updated}
