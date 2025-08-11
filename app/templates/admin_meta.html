@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>메타 관리(지점/팀)</h1>
+
+<div class="cards">
+  <div class="card">
+    <div class="card-title">지점 목록</div>
+    <div id="branches" style="margin-top:8px;"></div>
+    <form id="branch-form" class="meta-form">
+      <input name="code" placeholder="코드(KH 등)" required>
+      <input name="label_ko" placeholder="라벨(예: 아텐츠)" required>
+      <label><input type="checkbox" name="active" checked> 활성</label>
+      <button type="submit">추가/수정</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-title">팀 목록</div>
+    <div id="teams" style="margin-top:8px;"></div>
+    <form id="team-form" class="meta-form">
+      <input name="code" placeholder="코드(GANGNAM1 등)" required>
+      <input name="label_ko" placeholder="라벨(예: 강남 1팀)" required>
+      <label><input type="checkbox" name="active" checked> 활성</label>
+      <button type="submit">추가/수정</button>
+    </form>
+  </div>
+</div>
+
+<script>
+async function loadMeta() {
+  const branches = await fetch('/api/meta/branches').then(r=>r.json());
+  const teams = await fetch('/api/meta/teams').then(r=>r.json());
+
+  const header = `
+    <div class="row head">
+      <span>코드</span>
+      <span>라벨(한글)</span>
+      <span>상태</span>
+      <span>동작</span>
+    </div>`;
+
+  const toRow = (r, type) => `
+    <div class="row">
+      <span>${r.code}</span>
+      <span>${r.label_ko}</span>
+      <span>${r.active ? '활성' : '비활성'}</span>
+      <button class="btn" onclick="toggle('${type}','${r.code}')">토글</button>
+    </div>`;
+
+  document.getElementById('branches').innerHTML =
+    header + (branches.map(x=>toRow(x,'branches')).join('') || '<div class="empty">데이터 없음</div>');
+
+  document.getElementById('teams').innerHTML =
+    header + (teams.map(x=>toRow(x,'teams')).join('') || '<div class="empty">데이터 없음</div>');
+}
+
+async function toggle(type, code) {
+  await fetch(`/api/meta/${type}/${code}/toggle`, {method:'PATCH'});
+  await loadMeta();
+}
+
+document.getElementById('branch-form').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const payload = {
+    code: f.get('code'),
+    label_ko: f.get('label_ko'),
+    active: !!f.get('active')
+  };
+  await fetch('/api/meta/branches', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload)
+  });
+  e.target.reset();
+  await loadMeta();
+});
+
+document.getElementById('team-form').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const payload = {
+    code: f.get('code'),
+    label_ko: f.get('label_ko'),
+    active: !!f.get('active')
+  };
+  await fetch('/api/meta/teams', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload)
+  });
+  e.target.reset();
+  await loadMeta();
+});
+
+loadMeta();
+</script>
+
+<style>
+.row{display:flex;gap:12px;align-items:center;padding:6px 0;border-bottom:1px solid #eee}
+.row.head{font-weight:600;border-bottom:2px solid #ddd}
+.row span{min-width:120px}
+.meta-form{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.meta-form input{padding:6px 8px;border:1px solid #ddd;border-radius:6px}
+.meta-form button.btn,.btn{padding:6px 10px;border:1px solid #ddd;border-radius:6px;background:#f7f7f7;cursor:pointer}
+.empty{color:#888;padding:8px 0}
+</style>
+{% endblock %}
