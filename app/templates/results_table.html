@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>결과 관리</h1>
+
+<div class="cal-toolbar">
+  <div class="cal-left">
+    <label>시작 <input type="date" id="res-from"></label>
+    <label>종료 <input type="date" id="res-to"></label>
+    <button id="res-apply" class="btn">조회</button>
+  </div>
+  <div class="cal-right">
+    <select id="res-branch" class="sel"></select>
+    <select id="res-team" class="sel"></select>
+    <select id="res-counselor" class="sel"></select>
+    <select id="res-mode" class="sel">
+      <option value="">모드 전체</option>
+      <option value="OFFLINE">오프</option>
+      <option value="REMOTE">비</option>
+    </select>
+    <select id="res-status" class="sel">
+      <option value="">상태 전체</option>
+      <option value="PENDING">예정</option>
+      <option value="DONE">상담완료</option>
+      <option value="REGISTERED">등록</option>
+      <option value="NOT_REGISTERED">미등록</option>
+      <option value="CANCELED">상담취소</option>
+    </select>
+  </div>
+</div>
+
+<div class="batch-bar">
+  <span>일괄 변경</span>
+  <select id="batch-status" class="sel">
+    <option value="">상태 유지</option>
+    <option value="DONE">상담완료</option>
+    <option value="REGISTERED">등록</option>
+    <option value="NOT_REGISTERED">미등록</option>
+    <option value="CANCELED">상담취소</option>
+  </select>
+  <select id="batch-registered" class="sel"></select>
+  <select id="batch-cancel" class="sel">
+    <option value="">취소 사유 선택</option>
+    <option value="PERSONAL">개인 사유</option>
+    <option value="OTHER_INSTITUTE">타기관 등록</option>
+    <option value="NO_ANSWER">부재</option>
+    <option value="RESCHEDULE">일정 변경</option>
+  </select>
+  <input id="batch-comment" placeholder="공통 코멘트(선택)">
+  <button id="batch-apply" class="btn primary">적용</button>
+</div>
+
+<table class="table" id="res-table">
+  <thead>
+    <tr>
+      <th><input type="checkbox" id="chk-all"></th>
+      <th>일자</th>
+      <th>시간</th>
+      <th>지점</th>
+      <th>팀</th>
+      <th>상담사</th>
+      <th>신청 과목</th>
+      <th>상태</th>
+      <th>등록 과목</th>
+      <th>취소 사유</th>
+      <th>모드</th>
+      <th>코멘트</th>
+    </tr>
+  </thead>
+  <tbody id="res-tbody"></tbody>
+</table>
+{% endblock %}
