@@ -73,7 +73,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,Bli
 
 /* 모달 */
 .modal{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); z-index:1000}
-.modal.hidden{display:none}
+.modal[hidden]{display:none !important}
 .modal-content{width:820px; max-width:95vw; background:#fff; border-radius:10px; border:1px solid var(--border)}
 .modal-header{display:flex; align-items:center; padding:10px 12px; border-bottom:1px solid var(--border)}
 .modal-body{padding:12px}
