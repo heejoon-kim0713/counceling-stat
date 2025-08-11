@@ -8,7 +8,7 @@ STATUSES = ["PENDING", "DONE", "REGISTERED", "NOT_REGISTERED", "CANCELED"]
 CANCEL_REASONS = ["PERSONAL", "OTHER_INSTITUTE", "NO_ANSWER", "RESCHEDULE"]
 MODES = ["REMOTE", "OFFLINE"]  # UI 표기: 비/오프
 
-# 지점/팀 마스터
+# 지점/팀 마스터(데이터 기반 관리)
 class Branch(Base):
     __tablename__ = "branches"
     id = Column(Integer, primary_key=True)
