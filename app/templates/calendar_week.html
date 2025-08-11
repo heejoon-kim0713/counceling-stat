@@ -4,9 +4,9 @@
 
 <div class="cal-toolbar">
   <div class="cal-left">
-    <button id="btn-prev-week" class="btn">◀ 지난주</button>
+    <button id="btn-prev-week" class="btn" type="button">◀ 지난주</button>
     <input type="date" id="week-start" />
-    <button id="btn-next-week" class="btn">다음주 ▶</button>
+    <button id="btn-next-week" class="btn" type="button">다음주 ▶</button>
   </div>
   <div class="cal-right">
     <select id="filter-branch" class="sel"></select>
@@ -23,25 +23,32 @@
 <div id="calendar" class="cal">
   <div class="cal-header">
     <div class="time-col"></div>
-    <div class="day-col" data-day="0"></div><div class="day-col" data-day="1"></div>
-    <div class="day-col" data-day="2"></div><div class="day-col" data-day="3"></div>
-    <div class="day-col" data-day="4"></div><div class="day-col" data-day="5"></div>
+    <div class="day-col" data-day="0"></div>
+    <div class="day-col" data-day="1"></div>
+    <div class="day-col" data-day="2"></div>
+    <div class="day-col" data-day="3"></div>
+    <div class="day-col" data-day="4"></div>
+    <div class="day-col" data-day="5"></div>
     <div class="day-col" data-day="6"></div>
   </div>
   <div class="cal-body">
     <div class="time-col" id="time-scale"></div>
-    <div class="day-col body" data-day="0"></div><div class="day-col body" data-day="1"></div>
-    <div class="day-col body" data-day="2"></div><div class="day-col body" data-day="3"></div>
-    <div class="day-col body" data-day="4"></div><div class="day-col body" data-day="5"></div>
+    <div class="day-col body" data-day="0"></div>
+    <div class="day-col body" data-day="1"></div>
+    <div class="day-col body" data-day="2"></div>
+    <div class="day-col body" data-day="3"></div>
+    <div class="day-col body" data-day="4"></div>
+    <div class="day-col body" data-day="5"></div>
     <div class="day-col body" data-day="6"></div>
   </div>
 </div>
 
-<div id="modal" class="modal hidden">
+<!-- 공용 편집 모달: FOUC 방지 -->
+<div id="modal" class="modal" hidden aria-hidden="true" style="display:none">
   <div class="modal-content">
     <div class="modal-header">
       <h3 id="modal-title">일정</h3>
-      <button id="modal-close" class="btn">✕</button>
+      <button id="modal-close" class="btn" type="button">✕</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="form-id">
@@ -50,39 +57,56 @@
         <label>시작 <input type="time" id="form-start" step="1800"></label>
         <label>종료 <input type="time" id="form-end" step="1800"></label>
 
-        <label>상담사<select id="form-counselor"></select></label>
-        <label>지점<select id="form-branch"></select></label>
-        <label>팀<select id="form-team"></select></label>
+        <label>상담사
+          <select id="form-counselor"></select>
+        </label>
+        <label>지점
+          <select id="form-branch"></select>
+        </label>
+        <label>팀
+          <select id="form-team"></select>
+        </label>
 
-        <label>학생명<input type="text" id="form-student" placeholder="학생명(선택)"></label>
         <label>모드
-          <select id="form-mode"><option value="OFFLINE">오프</option><option value="REMOTE">비</option></select>
+          <select id="form-mode">
+            <option value="OFFLINE">오프</option>
+            <option value="REMOTE">비</option>
+          </select>
         </label>
         <label>상태
           <select id="form-status">
-            <option value="PENDING">예정</option><option value="DONE">상담완료</option>
-            <option value="REGISTERED">등록</option><option value="NOT_REGISTERED">미등록</option>
+            <option value="PENDING">예정</option>
+            <option value="DONE">상담완료</option>
+            <option value="REGISTERED">등록</option>
+            <option value="NOT_REGISTERED">미등록</option>
             <option value="CANCELED">상담취소</option>
           </select>
         </label>
-
-        <label>신청 과목<select id="form-requested"></select></label>
-        <label>등록 과목<select id="form-registered"></select></label>
+        <label>신청 과목
+          <select id="form-requested"></select>
+        </label>
+        <label>등록 과목
+          <select id="form-registered"></select>
+        </label>
 
         <label>취소 사유
           <select id="form-cancel">
-            <option value="">선택</option><option value="PERSONAL">개인 사유</option>
+            <option value="">선택</option>
+            <option value="PERSONAL">개인 사유</option>
             <option value="OTHER_INSTITUTE">타기관 등록</option>
-            <option value="NO_ANSWER">부재</option><option value="RESCHEDULE">일정 변경</option>
+            <option value="NO_ANSWER">부재</option>
+            <option value="RESCHEDULE">일정 변경</option>
           </select>
         </label>
-        <label class="full">코멘트<textarea id="form-comment" rows="2" placeholder="메모"></textarea></label>
+        <label class="full">코멘트
+          <textarea id="form-comment" rows="2" placeholder="메모"></textarea>
+        </label>
       </div>
     </div>
     <div class="modal-footer">
-      <button id="btn-delete" class="btn danger">삭제</button>
+      <button id="btn-delete" class="btn danger" type="button">삭제</button>
       <div style="flex:1"></div>
-      <button id="btn-save" class="btn primary">저장</button>
+      <button id="btn-save" class="btn primary" type="button">저장</button>
     </div>
   </div>
 </div>
