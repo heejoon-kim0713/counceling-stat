@@ -1,7 +1,7 @@
 from datetime import time
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
-from app.models import Session as Sess, Subject
+from app.models import Session as Sess, Subject, Branch, Team
 
 def is_30min_grid(t: time) -> bool:
     return t.minute in (0, 30) and t.second == 0 and t.microsecond == 0
@@ -25,3 +25,9 @@ def branch_subject_guard(db: Session, *, branch: str, requested_subject_id, regi
             subj = db.query(Subject).filter(Subject.id == sid).first()
             if (not subj) or subj.branch != branch:
                 raise ValueError("과목은 해당 지점의 목록에서만 선택할 수 있습니다.")
+
+def validate_branch_team(db: Session, *, branch: str, team: str):
+    if not db.query(Branch).filter(Branch.code == branch, Branch.active == True).first():
+        raise ValueError("등록되지 않은 지점 코드입니다.")
+    if not db.query(Team).filter(Team.code == team, Team.active == True).first():
+        raise ValueError("등록되지 않은 팀 코드입니다.")
