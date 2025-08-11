@@ -14,16 +14,18 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,Bli
 .table{width:100%;border-collapse:collapse;margin-top:16px;background:#fff;border:1px solid var(--border)}
 .table th,.table td{border-bottom:1px solid var(--border);padding:8px 10px;text-align:left}
 .footer{padding:24px 16px;color:var(--muted);text-align:center}
-@media (max-width:800px){.cards{grid-template-columns:1fr}}
-
-/* 폼/버튼 */
 .sel, select, input, textarea{padding:6px 8px;border:1px solid #ddd;border-radius:6px;background:#fff}
 .btn{padding:6px 10px;border:1px solid #ddd;border-radius:6px;background:#f7f7f7;cursor:pointer}
 .btn.primary{background:#2563eb;color:#fff;border-color:#1d4ed8}
 .btn.danger{background:#ef4444;color:#fff;border-color:#dc2626}
+@media (max-width:800px){.cards{grid-template-columns:1fr}}
+
+/* 툴바 */
+.cal-toolbar{display:flex;justify-content:space-between;gap:12px;margin:8px 0 12px 0}
+.batch-bar{display:flex;gap:8px;align-items:center;margin:8px 0}
+.batch-bar input, .batch-bar select{min-width:140px}
 
 /* 주간 캘린더 */
-.cal-toolbar{display:flex;justify-content:space-between;gap:12px;margin:8px 0 12px 0}
 .cal{border:1px solid var(--border);border-radius:8px;background:#fff;overflow:hidden}
 .cal-header, .cal-body{display:grid;grid-template-columns:100px repeat(7,1fr)}
 .cal-header{border-bottom:1px solid var(--border);background:#fafafa}
@@ -31,7 +33,6 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,Bli
 .cal-header .day-col:first-child{border-left:none}
 .day-label{font-weight:700}
 .time-col{background:#fcfcfc;border-right:1px solid var(--border)}
-
 .cal-body .time-col .time-slot{height:24px;font-size:12px;color:#777;padding:2px 6px;border-bottom:1px dashed #eee}
 .cal-body .day-col.body{position:relative;border-left:1px solid var(--border)}
 .cal-body .day-col.body::before{
@@ -45,6 +46,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,Bli
   position:absolute; left:8px; right:8px; border:1px solid #bbb; border-radius:6px;
   padding:4px 6px; font-size:12px; overflow:hidden;
   box-shadow:0 1px 2px rgba(0,0,0,0.06);
+  cursor:pointer;
 }
 .ev-time{font-weight:700; margin-bottom:2px}
 .ev-title{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
@@ -59,11 +61,18 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,Bli
 .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
 .grid .full{grid-column:1/-1}
 
+/* 일자 타임라인 */
+.day-board{display:grid; grid-template-columns:100px 1fr; border:1px solid var(--border); border-radius:8px; background:#fff}
+.time-rail{border-right:1px solid var(--border); background:#fafafa}
+.time-rail .time-slot{height:24px; font-size:12px; color:#777; padding:2px 6px; border-bottom:1px dashed #eee}
+.day-row{display:grid; grid-template-columns:180px 1fr; border-top:1px solid var(--border)}
+.day-row .row-head{padding:6px 8px; background:#fcfcfc; border-right:1px solid var(--border); font-weight:600}
+.day-row .row-body{position:relative}
+
+/* 관리자/메타 */
 .row{display:flex;gap:12px;align-items:center;padding:6px 0;border-bottom:1px solid #eee}
 .row.head{font-weight:600;border-bottom:2px solid #ddd}
 .row span{min-width:120px}
-
-/* 관리자/메타 등 기존 */
 .meta-form{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .meta-form input{padding:6px 8px;border:1px solid #ddd;border-radius:6px}
 .meta-form button.btn,.btn{padding:6px 10px;border:1px solid #ddd;border-radius:6px;background:#f7f7f7;cursor:pointer}
