@@ -2,29 +2,62 @@
 {% block content %}
 <h1>일별 DB 입력</h1>
 
-<div class="cal-toolbar">
-  <div class="cal-left">
-    <label>날짜 <input type="date" id="db-date"></label>
-    <select id="db-branch" class="sel"></select>
-    <input id="db-count" type="number" min="0" placeholder="DB 수">
-    <button id="db-save" class="btn primary">저장</button>
+<div class="cards">
+  <div class="card">
+    <div class="card-title">지점별 DB 입력</div>
+    <div class="cal-toolbar">
+      <div class="cal-left">
+        <label>날짜 <input type="date" id="db-date-branch"></label>
+        <select id="db-branch" class="sel"></select>
+        <input id="db-count-branch" type="number" min="0" placeholder="DB 수">
+        <button id="db-save-branch" class="btn primary">저장</button>
+      </div>
+    </div>
   </div>
-  <div class="cal-right">
-    <label>시작 <input type="date" id="db-from"></label>
-    <label>종료 <input type="date" id="db-to"></label>
-    <select id="db-filter-branch" class="sel"></select>
-    <button id="db-load" class="btn">조회</button>
+  <div class="card">
+    <div class="card-title">팀별 DB 입력</div>
+    <div class="cal-toolbar">
+      <div class="cal-left">
+        <label>날짜 <input type="date" id="db-date-team"></label>
+        <select id="db-team" class="sel"></select>
+        <input id="db-count-team" type="number" min="0" placeholder="DB 수">
+        <button id="db-save-team" class="btn primary">저장</button>
+      </div>
+    </div>
   </div>
 </div>
 
-<table class="table small" id="db-table">
-  <thead>
-    <tr>
-      <th>날짜</th>
-      <th>지점</th>
-      <th>DB 수</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+<div class="cards">
+  <div class="card">
+    <div class="card-title">지점별 DB 목록</div>
+    <div class="cal-toolbar">
+      <div class="cal-left">
+        <label>시작 <input type="date" id="db-from-branch"></label>
+        <label>종료 <input type="date" id="db-to-branch"></label>
+        <select id="db-filter-branch" class="sel"></select>
+        <button id="db-load-branch" class="btn">조회</button>
+      </div>
+    </div>
+    <table class="table small" id="db-table-branch">
+      <thead><tr><th>날짜</th><th>지점</th><th>DB 수</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">팀별 DB 목록</div>
+    <div class="cal-toolbar">
+      <div class="cal-left">
+        <label>시작 <input type="date" id="db-from-team"></label>
+        <label>종료 <input type="date" id="db-to-team"></label>
+        <select id="db-filter-team" class="sel"></select>
+        <button id="db-load-team" class="btn">조회</button>
+      </div>
+    </div>
+    <table class="table small" id="db-table-team">
+      <thead><tr><th>날짜</th><th>팀</th><th>DB 수</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}
