@@ -2,15 +2,15 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from pathlib import Path
 
 from app.db import Base, engine, SessionLocal
 from app.models import Subject, Counselor, Branch, Team
-from app.routers import views, subjects, counselors, sessions, daily_db, daily_db_team, meta, stats
+from app.routers import views, subjects, counselors, sessions, daily_db, meta, stats
 
 app = FastAPI(title="상담 스케줄러")
 
-# 정적 파일: app/static
 BASE_DIR = Path(__file__).resolve().parents[1]
 STATIC_DIR = BASE_DIR / "app" / "static"
 STATIC_DIR.mkdir(parents=True, exist_ok=True)
@@ -22,14 +22,22 @@ app.include_router(subjects.router, prefix="/api/subjects", tags=["subjects"])
 app.include_router(counselors.router, prefix="/api/counselors", tags=["counselors"])
 app.include_router(sessions.router, prefix="/api/sessions", tags=["sessions"])
 app.include_router(daily_db.router, prefix="/api/daily-db", tags=["daily-db"])
-app.include_router(daily_db_team.router, prefix="/api/daily-db-team", tags=["daily-db-team"])
 app.include_router(meta.router, prefix="/api/meta", tags=["meta"])
 app.include_router(stats.router, prefix="/api/stats", tags=["stats"])
 
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
+    migrate_add_student_name()
     seed_data()
+
+def migrate_add_student_name():
+    # SQLite 컬럼 존재 확인 후 없으면 추가
+    with engine.connect() as conn:
+        cols = conn.execute(text("PRAGMA table_info('sessions');")).fetchall()
+        names = {c[1] for c in cols}  # 1=column name
+        if "student_name" not in names:
+            conn.execute(text("ALTER TABLE sessions ADD COLUMN student_name TEXT;"))
 
 def seed_data():
     db: Session = SessionLocal()
@@ -42,7 +50,7 @@ def seed_data():
         for code, label in [("JONGNO","종로"), ("DANGSAN","당산"), ("GANGNAM1","강남 1팀"), ("GANGNAM2","강남 2팀")]:
             if not db.query(Team).filter(Team.code==code).first():
                 db.add(Team(code=code, label_ko=label, active=True))
-        # 과목(지점별)
+        # 과목
         seeds = [
             ("자바","KH"),("보안","KH"),("클라우드","KH"),("빅데이터","KH"),
             ("프로그래밍","ATENZ"),("기획","ATENZ"),("원화","ATENZ"),("3D그래픽","ATENZ"),
@@ -52,7 +60,7 @@ def seed_data():
         for name, branch in seeds:
             if not db.query(Subject).filter(Subject.name==name, Subject.branch==branch).first():
                 db.add(Subject(name=name, branch=branch, active=True))
-        # 상담사(샘플)
+        # 상담사 샘플
         if db.query(Counselor).count() == 0:
             db.add_all([
                 Counselor(name="김상담", branch="KH",    team="JONGNO"),
