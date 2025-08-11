@@ -11,4 +11,11 @@
 .table{width:100%;border-collapse:collapse;margin-top:16px;background:#fff;border:1px solid var(--border)}
 .table th,.table td{border-bottom:1px solid var(--border);padding:8px 10px;text-align:left}
 .footer{padding:24px 16px;color:var(--muted);text-align:center}
+.row{display:flex;gap:12px;align-items:center;padding:6px 0;border-bottom:1px solid #eee}
+.row.head{font-weight:600;border-bottom:2px solid #ddd}
+.row span{min-width:120px}
+.meta-form{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.meta-form input{padding:6px 8px;border:1px solid #ddd;border-radius:6px}
+.meta-form button.btn,.btn{padding:6px 10px;border:1px solid #ddd;border-radius:6px;background:#f7f7f7;cursor:pointer}
+.empty{color:#888;padding:8px 0}
 @media (max-width:800px){.cards{grid-template-columns:1fr}}
