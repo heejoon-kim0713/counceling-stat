@@ -14,18 +14,13 @@ from app.services.labels import branch_label, team_label, mode_label
 
 router = APIRouter()
 
-# 디렉터리 기준점
 # __file__ = app/routers/views.py
-# parents[0] = app/routers, parents[1] = app, parents[2] = 리포 루트
 APP_DIR = Path(__file__).resolve().parents[1]
 REPO_ROOT = APP_DIR.parent
-
-# 템플릿은 app/templates를 사용
 templates = Jinja2Templates(directory=str(APP_DIR / "templates"))
 
 @router.get("/", response_class=HTMLResponse)
 def root(request: Request):
-    # 루트 접근 시 항상 /dashboard로 이동
     return RedirectResponse(url="/dashboard")
 
 @router.get("/dashboard", response_class=HTMLResponse)
@@ -35,6 +30,14 @@ def dashboard(request: Request):
 @router.get("/calendar/weekly", response_class=HTMLResponse)
 def calendar_week(request: Request):
     return templates.TemplateResponse("calendar_week.html", {"request": request})
+
+@router.get("/calendar/day", response_class=HTMLResponse)
+def calendar_day(request: Request):
+    return templates.TemplateResponse("day_timeline.html", {"request": request})
+
+@router.get("/results", response_class=HTMLResponse)
+def results_table(request: Request):
+    return templates.TemplateResponse("results_table.html", {"request": request})
 
 @router.get("/mismatch", response_class=HTMLResponse)
 def mismatch_page(
@@ -46,13 +49,6 @@ def mismatch_page(
     team: str | None = Query(None),
     mode: str | None = Query(None),
 ):
-    """
-    과목 불일치 분석 페이지
-    - 기본 기간: 최근 30일
-    - 조건: status=REGISTERED AND 신청 과목 입력됨 AND 신청≠등록
-    - 지점/팀/모드 필터 지원
-    - 한글 라벨: 지점/팀/모드에 DB 기반 라벨 적용
-    """
     if not from_date or not to_date:
         to_date = date.today()
         from_date = to_date - timedelta(days=30)
@@ -67,18 +63,14 @@ def mismatch_page(
             Sess.requested_subject_id != Sess.registered_subject_id,
         )
     )
-    if branch:
-        q = q.filter(Sess.branch == branch)
-    if team:
-        q = q.filter(Sess.team == team)
-    if mode:
-        q = q.filter(Sess.mode == mode)
+    if branch: q = q.filter(Sess.branch == branch)
+    if team: q = q.filter(Sess.team == team)
+    if mode: q = q.filter(Sess.mode == mode)
 
     rows = q.order_by(Sess.date.desc(), Sess.start_time).all()
 
     def subj_name(subj_id: int | None) -> str:
-        if not subj_id:
-            return ""
+        if not subj_id: return ""
         s = db.query(Subject).filter(Subject.id == subj_id).first()
         return s.name if s else ""
 
@@ -88,12 +80,12 @@ def mismatch_page(
         items.append({
             "date": s.date.isoformat(),
             "time": f"{s.start_time.strftime('%H:%M')}~{s.end_time.strftime('%H:%M')}",
-            "branch": branch_label(db, s.branch),  # 한글 라벨
-            "team": team_label(db, s.team),        # 한글 라벨
+            "branch": branch_label(db, s.branch),
+            "team": team_label(db, s.team),
             "counselor": counselor.name if counselor else "",
             "requested": subj_name(s.requested_subject_id),
             "registered": subj_name(s.registered_subject_id),
-            "mode": mode_label(s.mode),            # 비/오프
+            "mode": mode_label(s.mode),
             "comment": s.comment or ""
         })
 
@@ -106,9 +98,4 @@ def mismatch_page(
 
 @router.get("/admin/meta", response_class=HTMLResponse)
 def admin_meta(request: Request):
-    """
-    메타 관리(지점/팀) 페이지
-    - /api/meta/branches, /api/meta/teams API와 연동
-    - 추가/수정, 활성/비활성 토글 지원
-    """
     return templates.TemplateResponse("admin_meta.html", {"request": request})
