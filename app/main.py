@@ -6,11 +6,11 @@ from pathlib import Path
 
 from app.db import Base, engine, SessionLocal
 from app.models import Subject, Counselor, Branch, Team
-from app.routers import views, subjects, counselors, sessions, daily_db, meta
+from app.routers import views, subjects, counselors, sessions, daily_db, meta, stats
 
 app = FastAPI(title="상담 스케줄러")
 
-# 정적 파일: app/static 디렉터리로 고정
+# 정적 파일: app/static
 BASE_DIR = Path(__file__).resolve().parents[1]
 STATIC_DIR = BASE_DIR / "app" / "static"
 STATIC_DIR.mkdir(parents=True, exist_ok=True)
@@ -23,6 +23,7 @@ app.include_router(counselors.router, prefix="/api/counselors", tags=["counselor
 app.include_router(sessions.router, prefix="/api/sessions", tags=["sessions"])
 app.include_router(daily_db.router, prefix="/api/daily-db", tags=["daily-db"])
 app.include_router(meta.router, prefix="/api/meta", tags=["meta"])
+app.include_router(stats.router, prefix="/api/stats", tags=["stats"])
 
 @app.on_event("startup")
 def on_startup():
@@ -32,17 +33,15 @@ def on_startup():
 def seed_data():
     db: Session = SessionLocal()
     try:
-        # 지점 시드(한글 라벨)
+        # 지점
         for code, label in [("KH","KH"), ("ATENZ","아텐츠"), ("VIDEO","영상")]:
             if not db.query(Branch).filter(Branch.code==code).first():
                 db.add(Branch(code=code, label_ko=label, active=True))
-
-        # 팀 시드(한글 라벨)
+        # 팀
         for code, label in [("JONGNO","종로"), ("DANGSAN","당산"), ("GANGNAM1","강남 1팀"), ("GANGNAM2","강남 2팀")]:
             if not db.query(Team).filter(Team.code==code).first():
                 db.add(Team(code=code, label_ko=label, active=True))
-
-        # 과목 시드(지점별)
+        # 과목(지점별)
         seeds = [
             ("자바","KH"),("보안","KH"),("클라우드","KH"),("빅데이터","KH"),
             ("프로그래밍","ATENZ"),("기획","ATENZ"),("원화","ATENZ"),("3D그래픽","ATENZ"),
@@ -52,8 +51,7 @@ def seed_data():
         for name, branch in seeds:
             if not db.query(Subject).filter(Subject.name==name, Subject.branch==branch).first():
                 db.add(Subject(name=name, branch=branch, active=True))
-
-        # 상담사 샘플(존재 없을 때만)
+        # 상담사(샘플)
         if db.query(Counselor).count() == 0:
             db.add_all([
                 Counselor(name="김상담", branch="KH",    team="JONGNO"),
