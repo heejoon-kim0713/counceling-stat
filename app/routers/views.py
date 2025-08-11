@@ -1,18 +1,23 @@
 from datetime import date, timedelta
 from fastapi import APIRouter, Request, Depends, Query
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
+from pathlib import Path
 from app.db import get_db
 from app.models import Session as Sess, Counselor, Subject
 
-templates = Jinja2Templates(directory="app/templates")
 router = APIRouter()
+BASE_DIR = Path(__file__).resolve().parents[1]  # repo root
+templates = Jinja2Templates(directory=str(BASE_DIR / "app" / "templates"))
 
 @router.get("/", response_class=HTMLResponse)
-def home(request: Request):
-    return templates.TemplateResponse("dashboard.html", {"request": request})
+def root(request: Request):
+    index_file = BASE_DIR / "index.html"
+    if index_file.exists():
+        return FileResponse(str(index_file))
+    return RedirectResponse(url="/dashboard")
 
 @router.get("/dashboard", response_class=HTMLResponse)
 def dashboard(request: Request):
@@ -32,20 +37,16 @@ def mismatch_page(
     team: str | None = Query(None),
     mode: str | None = Query(None),
 ):
-    # 기본 기간 = 최근 30일
     if not from_date or not to_date:
         to_date = date.today()
         from_date = to_date - timedelta(days=30)
 
     q = db.query(Sess).filter(
-        and_(
-            Sess.date >= from_date,
-            Sess.date <= to_date,
-            Sess.status == "REGISTERED",
-            Sess.requested_subject_id.isnot(None),
-            Sess.registered_subject_id.isnot(None),
-            Sess.requested_subject_id != Sess.registered_subject_id,
-        )
+        and_(Sess.date >= from_date, Sess.date <= to_date,
+             Sess.status == "REGISTERED",
+             Sess.requested_subject_id.isnot(None),
+             Sess.registered_subject_id.isnot(None),
+             Sess.requested_subject_id != Sess.registered_subject_id)
     )
     if branch: q = q.filter(Sess.branch == branch)
     if team: q = q.filter(Sess.team == team)
@@ -53,20 +54,20 @@ def mismatch_page(
 
     rows = q.order_by(Sess.date.desc(), Sess.start_time).all()
 
-    # 화면 표시용
-    def subj_name(subj_id: int | None):
-        if not subj_id: return ""
-        s = db.query(Subject).filter(Subject.id == subj_id).first()
+    def subj_name(sid):
+        if not sid: return ""
+        s = db.query(Subject).filter(Subject.id == sid).first()
         return s.name if s else ""
 
     items = []
     for s in rows:
+        c = db.query(Counselor).get(s.counselor_id)
         items.append({
-            "date": s.date,
+            "date": s.date.isoformat(),
             "time": f"{s.start_time.strftime('%H:%M')}~{s.end_time.strftime('%H:%M')}",
             "branch": s.branch,
             "team": s.team,
-            "counselor": db.query(Counselor).get(s.counselor_id).name if s.counselor_id else "",
+            "counselor": c.name if c else "",
             "requested": subj_name(s.requested_subject_id),
             "registered": subj_name(s.registered_subject_id),
             "mode": "비" if s.mode == "REMOTE" else "오프",
