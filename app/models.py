@@ -1,13 +1,14 @@
+# app/models.py
 from sqlalchemy import Column, Integer, String, Date, Time, ForeignKey, Boolean, DateTime, func
 from sqlalchemy.orm import relationship
 from app.db import Base
 
-# 상태/사유/모드 상수(유지)
+# 상태/사유/모드 상수
 STATUSES = ["PENDING", "DONE", "REGISTERED", "NOT_REGISTERED", "CANCELED"]
 CANCEL_REASONS = ["PERSONAL", "OTHER_INSTITUTE", "NO_ANSWER", "RESCHEDULE"]
 MODES = ["REMOTE", "OFFLINE"]  # UI 표기: 비/오프
 
-# 신규: 지점/팀 마스터(코드 + 한글 라벨 + 활성여부)
+# 지점/팀 마스터
 class Branch(Base):
     __tablename__ = "branches"
     id = Column(Integer, primary_key=True)
@@ -65,3 +66,10 @@ class Session(Base):
     counselor = relationship("Counselor", back_populates="sessions")
     requested_subject = relationship("Subject", foreign_keys=[requested_subject_id])
     registered_subject = relationship("Subject", foreign_keys=[registered_subject_id])
+
+class DailyDB(Base):
+    __tablename__ = "daily_db"
+    id = Column(Integer, primary_key=True)
+    date = Column(Date, nullable=False)
+    branch = Column(String, nullable=False)  # Branch.code
+    db_count = Column(Integer, nullable=False, default=0)
