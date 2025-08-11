@@ -14,14 +14,19 @@ from app.services.labels import branch_label, team_label, mode_label
 
 router = APIRouter()
 
-# repo root (…/app/routers/views.py 기준 상위 두 단계)
-BASE_DIR = Path(__file__).resolve().parents[1]
-templates = Jinja2Templates(directory=str(BASE_DIR / "app" / "templates"))
+# 디렉터리 기준점
+# __file__ = app/routers/views.py
+# parents[0] = app/routers, parents[1] = app, parents[2] = 리포 루트
+APP_DIR = Path(__file__).resolve().parents[1]
+REPO_ROOT = APP_DIR.parent
+
+# 템플릿은 app/templates를 사용
+templates = Jinja2Templates(directory=str(APP_DIR / "templates"))
 
 @router.get("/", response_class=HTMLResponse)
 def root(request: Request):
-    """루트 접근 시: 리포 루트의 index.html이 있으면 그대로 서빙, 없으면 대시보드로 이동"""
-    index_file = BASE_DIR / "index.html"
+    """리포 루트에 index.html이 있으면 그대로 서빙, 없으면 대시보드로 이동"""
+    index_file = REPO_ROOT / "index.html"
     if index_file.exists():
         return FileResponse(str(index_file))
     return RedirectResponse(url="/dashboard")
