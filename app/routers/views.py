@@ -34,6 +34,11 @@ def calendar_week(request: Request):
 def calendar_day(request: Request):
     return templates.TemplateResponse("day_timeline.html", {"request": request})
 
+# 신규: 월간 캘린더
+@router.get("/calendar/month", response_class=HTMLResponse)
+def calendar_month(request: Request):
+    return templates.TemplateResponse("calendar_month.html", {"request": request})
+
 @router.get("/results", response_class=HTMLResponse)
 def results_table(request: Request):
     return templates.TemplateResponse("results_table.html", {"request": request})
@@ -102,3 +107,8 @@ def admin_meta(request: Request):
 @router.get("/admin/db", response_class=HTMLResponse)
 def admin_db(request: Request):
     return templates.TemplateResponse("admin_db.html", {"request": request})
+
+# 상담사 본인 일자별 등록 시트
+@router.get("/my/daily", response_class=HTMLResponse)
+def my_daily(request: Request):
+    return templates.TemplateResponse("my_daily.html", {"request": request})
