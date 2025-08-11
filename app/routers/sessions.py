@@ -4,8 +4,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from app.db import get_db
-from app.models import Session as Sess, Counselor, BRANCHES, TEAMS, STATUSES, CANCEL_REASONS, MODES
-from app.services.validators import is_30min_grid, check_overlap, enforce_conditionals, branch_subject_guard
+from app.models import Session as Sess, Counselor, STATUSES, MODES
+from app.services.validators import (
+    is_30min_grid, check_overlap, enforce_conditionals,
+    branch_subject_guard, validate_branch_team
+)
 
 router = APIRouter()
 
@@ -64,10 +67,10 @@ def list_sessions(
 
 @router.post("/")
 def create_session(payload: SessionCreate, db: Session = Depends(get_db)):
-    if payload.branch not in BRANCHES: raise HTTPException(400, "유효하지 않은 지점입니다.")
-    if payload.team not in TEAMS: raise HTTPException(400, "유효하지 않은 팀입니다.")
-    if payload.status not in STATUSES: raise HTTPException(400, "유효하지 않은 상태입니다.")
-    if payload.mode not in MODES: raise HTTPException(400, "유효하지 않은 비대면/오프라인 값입니다.")
+    if payload.status not in STATUSES:
+        raise HTTPException(400, "유효하지 않은 상태입니다.")
+    if payload.mode not in MODES:
+        raise HTTPException(400, "유효하지 않은 비대면/오프라인 값입니다.")
     if not is_30min_grid(payload.start_time) or not is_30min_grid(payload.end_time):
         raise HTTPException(400, "시작/종료 시각은 30분 단위여야 합니다.")
     if payload.end_time <= payload.start_time:
@@ -79,6 +82,7 @@ def create_session(payload: SessionCreate, db: Session = Depends(get_db)):
                      start_time=payload.start_time, end_time=payload.end_time):
         raise HTTPException(400, "동일 상담사의 시간이 겹칩니다.")
     try:
+        validate_branch_team(db, branch=payload.branch, team=payload.team)
         enforce_conditionals(status=payload.status,
                              registered_subject_id=payload.registered_subject_id,
                              cancel_reason=payload.cancel_reason)
