@@ -1,3 +1,4 @@
+<!-- app/templates/base.html -->
 <!doctype html>
 <html lang="ko">
 <head>
@@ -13,11 +14,13 @@
     <a href="/dashboard">대시보드</a>
     <a href="/calendar/weekly">주간 캘린더</a>
     <a href="/mismatch">과목 불일치</a>
+    <a href="/admin/meta">관리자</a>
   </nav>
 </header>
 <main class="container">
   {% block content %}{% endblock %}
 </main>
 <footer class="footer"><small>© 2025 상담 스케줄러</small></footer>
+<script src="/static/script.js"></script>
 </body>
 </html>
