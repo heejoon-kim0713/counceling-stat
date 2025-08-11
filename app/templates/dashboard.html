@@ -1,10 +1,60 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>대시보드(초기)</h1>
-<p>다음 단계에서 KPI(지점별 등록률/상담률, 과목별 등록률)와 기간 필터를 연결합니다.</p>
-<div class="cards">
-  <div class="card"><div class="card-title">지점별 등록률</div><div class="card-value">-</div></div>
-  <div class="card"><div class="card-title">지점별 상담률</div><div class="card-value">-</div></div>
-  <div class="card"><div class="card-title">과목별 등록률(신청 기준)</div><div class="card-value">-</div></div>
+<h1>대시보드</h1>
+
+<div class="cal-toolbar">
+  <div class="cal-left">
+    <label>시작 <input type="date" id="dash-from"></label>
+    <label>종료 <input type="date" id="dash-to"></label>
+    <button id="dash-apply" class="btn">적용</button>
+  </div>
+  <div class="cal-right">
+    <select id="dash-branch" class="sel"></select>
+    <select id="dash-team" class="sel"></select>
+  </div>
 </div>
+
+<div class="cards kpi">
+  <div class="card">
+    <div class="card-title">지점별 등록률(전체)</div>
+    <div class="card-value" id="card-branch-reg">-</div>
+  </div>
+  <div class="card">
+    <div class="card-title">지점별 상담률(전체)</div>
+    <div class="card-value" id="card-branch-counsel">-</div>
+  </div>
+  <div class="card">
+    <div class="card-title">과목별 등록률(신청 기준/전체)</div>
+    <div class="card-value" id="card-subject-reg">-</div>
+  </div>
+</div>
+
+<h3>지점별 지표</h3>
+<table class="table small" id="tbl-branch">
+  <thead>
+    <tr>
+      <th>지점</th>
+      <th>상담 수</th>
+      <th>등록 수</th>
+      <th>총 DB 수</th>
+      <th>등록률</th>
+      <th>상담률</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<h3>과목별 등록률(신청 기준)</h3>
+<table class="table small" id="tbl-subject">
+  <thead>
+    <tr>
+      <th>과목</th>
+      <th>지점</th>
+      <th>상담 수</th>
+      <th>등록 수</th>
+      <th>등록률</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
 {% endblock %}
