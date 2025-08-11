@@ -12,8 +12,6 @@
   </div>
 </div>
 
-<p class="muted">상담사를 선택한 뒤 좌측 시간대 영역을 클릭하면 새 일정 모달이 열립니다.</p>
-
 <div id="my-daily" class="day-board">
   <div class="time-rail" id="my-time-rail"></div>
   <div class="rows">
@@ -24,7 +22,7 @@
   </div>
 </div>
 
-<!-- 주간과 동일 모달(학생명 포함) -->
+<!-- 공용 편집 모달 -->
 <div id="modal" class="modal hidden">
   <div class="modal-content">
     <div class="modal-header">
@@ -38,33 +36,50 @@
         <label>시작 <input type="time" id="form-start" step="1800"></label>
         <label>종료 <input type="time" id="form-end" step="1800"></label>
 
-        <label>상담사<select id="form-counselor"></select></label>
-        <label>지점<select id="form-branch"></select></label>
-        <label>팀<select id="form-team"></select></label>
+        <label>상담사
+          <select id="form-counselor"></select>
+        </label>
+        <label>지점
+          <select id="form-branch"></select>
+        </label>
+        <label>팀
+          <select id="form-team"></select>
+        </label>
 
-        <label>학생명<input type="text" id="form-student" placeholder="학생명(선택)"></label>
         <label>모드
-          <select id="form-mode"><option value="OFFLINE">오프</option><option value="REMOTE">비</option></select>
+          <select id="form-mode">
+            <option value="OFFLINE">오프</option>
+            <option value="REMOTE">비</option>
+          </select>
         </label>
         <label>상태
           <select id="form-status">
-            <option value="PENDING">예정</option><option value="DONE">상담완료</option>
-            <option value="REGISTERED">등록</option><option value="NOT_REGISTERED">미등록</option>
+            <option value="PENDING">예정</option>
+            <option value="DONE">상담완료</option>
+            <option value="REGISTERED">등록</option>
+            <option value="NOT_REGISTERED">미등록</option>
             <option value="CANCELED">상담취소</option>
           </select>
         </label>
-
-        <label>신청 과목<select id="form-requested"></select></label>
-        <label>등록 과목<select id="form-registered"></select></label>
+        <label>신청 과목
+          <select id="form-requested"></select>
+        </label>
+        <label>등록 과목
+          <select id="form-registered"></select>
+        </label>
 
         <label>취소 사유
           <select id="form-cancel">
-            <option value="">선택</option><option value="PERSONAL">개인 사유</option>
+            <option value="">선택</option>
+            <option value="PERSONAL">개인 사유</option>
             <option value="OTHER_INSTITUTE">타기관 등록</option>
-            <option value="NO_ANSWER">부재</option><option value="RESCHEDULE">일정 변경</option>
+            <option value="NO_ANSWER">부재</option>
+            <option value="RESCHEDULE">일정 변경</option>
           </select>
         </label>
-        <label class="full">코멘트<textarea id="form-comment" rows="2" placeholder="메모"></textarea></label>
+        <label class="full">코멘트
+          <textarea id="form-comment" rows="2" placeholder="메모"></textarea>
+        </label>
       </div>
     </div>
     <div class="modal-footer">
