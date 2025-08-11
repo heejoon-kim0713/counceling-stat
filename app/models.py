@@ -73,3 +73,11 @@ class DailyDB(Base):
     date = Column(Date, nullable=False)
     branch = Column(String, nullable=False)  # Branch.code
     db_count = Column(Integer, nullable=False, default=0)
+
+# 신규: 팀별 일별 DB (팀 필터 시 분모로 사용)
+class DailyDBTeam(Base):
+    __tablename__ = "daily_db_team"
+    id = Column(Integer, primary_key=True)
+    date = Column(Date, nullable=False)
+    team = Column(String, nullable=False)    # Team.code
+    db_count = Column(Integer, nullable=False, default=0)
