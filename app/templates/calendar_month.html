@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>월간 캘린더</h1>
+
+<div class="cal-toolbar">
+  <div class="cal-left">
+    <button id="mon-prev" class="btn">◀ 이전달</button>
+    <input type="month" id="mon-ym">
+    <button id="mon-next" class="btn">다음달 ▶</button>
+  </div>
+  <div class="cal-right">
+    <select id="mon-branch" class="sel"></select>
+    <select id="mon-team" class="sel"></select>
+    <select id="mon-counselor" class="sel"></select>
+    <select id="mon-mode" class="sel">
+      <option value="">모드 전체</option>
+      <option value="OFFLINE">오프</option>
+      <option value="REMOTE">비</option>
+    </select>
+  </div>
+</div>
+
+<div id="month-board" class="month-board">
+  <div class="month-header">
+    <div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div><div>일</div>
+  </div>
+  <div class="month-grid" id="month-grid">
+    <!-- JS가 셀을 채웁니다 -->
+  </div>
+</div>
+
+<!-- 편집 모달(주간/내 일자와 동일 구조) -->
+<div id="modal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modal-title">일정</h3>
+      <button id="modal-close" class="btn">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="form-id">
+      <div class="grid">
+        <label>날짜<input type="date" id="form-date"></label>
+        <label>시작 <input type="time" id="form-start" step="1800"></label>
+        <label>종료 <input type="time" id="form-end" step="1800"></label>
+
+        <label>상담사
+          <select id="form-counselor"></select>
+        </label>
+        <label>지점
+          <select id="form-branch"></select>
+        </label>
+        <label>팀
+          <select id="form-team"></select>
+        </label>
+
+        <label>모드
+          <select id="form-mode">
+            <option value="OFFLINE">오프</option>
+            <option value="REMOTE">비</option>
+          </select>
+        </label>
+        <label>상태
+          <select id="form-status">
+            <option value="PENDING">예정</option>
+            <option value="DONE">상담완료</option>
+            <option value="REGISTERED">등록</option>
+            <option value="NOT_REGISTERED">미등록</option>
+            <option value="CANCELED">상담취소</option>
+          </select>
+        </label>
+        <label>신청 과목
+          <select id="form-requested"></select>
+        </label>
+        <label>등록 과목
+          <select id="form-registered"></select>
+        </label>
+
+        <label>취소 사유
+          <select id="form-cancel">
+            <option value="">선택</option>
+            <option value="PERSONAL">개인 사유</option>
+            <option value="OTHER_INSTITUTE">타기관 등록</option>
+            <option value="NO_ANSWER">부재</option>
+            <option value="RESCHEDULE">일정 변경</option>
+          </select>
+        </label>
+        <label class="full">코멘트
+          <textarea id="form-comment" rows="2" placeholder="메모"></textarea>
+        </label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button id="btn-delete" class="btn danger">삭제</button>
+      <div style="flex:1"></div>
+      <button id="btn-save" class="btn primary">저장</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
