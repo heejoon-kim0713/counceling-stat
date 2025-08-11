@@ -25,10 +25,7 @@ templates = Jinja2Templates(directory=str(APP_DIR / "templates"))
 
 @router.get("/", response_class=HTMLResponse)
 def root(request: Request):
-    """리포 루트에 index.html이 있으면 그대로 서빙, 없으면 대시보드로 이동"""
-    index_file = REPO_ROOT / "index.html"
-    if index_file.exists():
-        return FileResponse(str(index_file))
+    # 루트 접근 시 항상 /dashboard로 이동
     return RedirectResponse(url="/dashboard")
 
 @router.get("/dashboard", response_class=HTMLResponse)
